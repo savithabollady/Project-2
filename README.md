@@ -1,1 +1,647 @@
-PLease dont reject this project, I am working on it and will submit the details by 7th Nov
+Code:
+
+> Churn <- read.csv("C:/Users/Savitha/Desktop/R Studio/Project to Submit/Project 2/Churn - churn1.csv")
+> View(Churn)
+> library(plyr)
+> library(corrplot)
+> library(ggplot2)
+> library(gridExtra)
+> library(ggthemes)
+> library(caret)
+> library(MASS)
+> library(randomForest)
+> library(party)
+> library(glmnet)
+> library(boot)
+> library(caret)
+> library(popbio)
+> library(pROC)
+> library(rpart)
+> library(rattle)
+> library(dplyr)
+> library(lattice)
+> library(ggplot2)
+> str(Churn)
+'data.frame':	3333 obs. of  21 variables:
+ $ State         : Factor w/ 51 levels "AK","AL","AR",..: 17 36 32 36 37 2 20 25 19 50 ...
+ $ Account.Length: int  128 107 137 84 75 118 121 147 117 141 ...
+ $ Area.Code     : int  415 415 415 408 415 510 510 415 408 415 ...
+ $ Phone         : Factor w/ 3333 levels "327-1058","327-1319",..: 1927 1576 1118 1708 111 2254 1048 81 292 118 ...
+ $ Int.l.Plan    : Factor w/ 2 levels "no","yes": 1 1 1 2 2 2 1 2 1 2 ...
+ $ VMail.Plan    : Factor w/ 2 levels "no","yes": 2 2 1 1 1 1 2 1 1 2 ...
+ $ VMail.Message : int  25 26 0 0 0 0 24 0 0 37 ...
+ $ Day.Mins      : num  265 162 243 299 167 ...
+ $ Day.Calls     : int  110 123 114 71 113 98 88 79 97 84 ...
+ $ Day.Charge    : num  45.1 27.5 41.4 50.9 28.3 ...
+ $ Eve.Mins      : num  197.4 195.5 121.2 61.9 148.3 ...
+ $ Eve.Calls     : int  99 103 110 88 122 101 108 94 80 111 ...
+ $ Eve.Charge    : num  16.78 16.62 10.3 5.26 12.61 ...
+ $ Night.Mins    : num  245 254 163 197 187 ...
+ $ Night.Calls   : int  91 103 104 89 121 118 118 96 90 97 ...
+ $ Night.Charge  : num  11.01 11.45 7.32 8.86 8.41 ...
+ $ Intl.Mins     : num  10 13.7 12.2 6.6 10.1 6.3 7.5 7.1 8.7 11.2 ...
+ $ Intl.Calls    : int  3 3 5 7 3 6 7 6 4 5 ...
+ $ Intl.Charge   : num  2.7 3.7 3.29 1.78 2.73 1.7 2.03 1.92 2.35 3.02 ...
+ $ CustServ.Calls: int  1 1 0 2 3 0 3 0 1 0 ...
+ $ Churn         : logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+> summary(Churn)
+     State      Account.Length    Area.Code          Phone      Int.l.Plan
+ WV     : 106   Min.   :  1.0   Min.   :408.0   327-1058:   1   no :3010  
+ MN     :  84   1st Qu.: 74.0   1st Qu.:408.0   327-1319:   1   yes: 323  
+ NY     :  83   Median :101.0   Median :415.0   327-3053:   1             
+ AL     :  80   Mean   :101.1   Mean   :437.2   327-3587:   1             
+ OH     :  78   3rd Qu.:127.0   3rd Qu.:510.0   327-3850:   1             
+ OR     :  78   Max.   :243.0   Max.   :510.0   327-3954:   1             
+ (Other):2824                                   (Other) :3327             
+ VMail.Plan VMail.Message       Day.Mins       Day.Calls       Day.Charge   
+ no :2411   Min.   : 0.000   Min.   :  0.0   Min.   :  0.0   Min.   : 0.00  
+ yes: 922   1st Qu.: 0.000   1st Qu.:143.7   1st Qu.: 87.0   1st Qu.:24.43  
+            Median : 0.000   Median :179.4   Median :101.0   Median :30.50  
+            Mean   : 8.099   Mean   :179.8   Mean   :100.4   Mean   :30.56  
+            3rd Qu.:20.000   3rd Qu.:216.4   3rd Qu.:114.0   3rd Qu.:36.79  
+            Max.   :51.000   Max.   :350.8   Max.   :165.0   Max.   :59.64  
+                                                                            
+    Eve.Mins       Eve.Calls       Eve.Charge      Night.Mins     Night.Calls   
+ Min.   :  0.0   Min.   :  0.0   Min.   : 0.00   Min.   : 23.2   Min.   : 33.0  
+ 1st Qu.:166.6   1st Qu.: 87.0   1st Qu.:14.16   1st Qu.:167.0   1st Qu.: 87.0  
+ Median :201.4   Median :100.0   Median :17.12   Median :201.2   Median :100.0  
+ Mean   :201.0   Mean   :100.1   Mean   :17.08   Mean   :200.9   Mean   :100.1  
+ 3rd Qu.:235.3   3rd Qu.:114.0   3rd Qu.:20.00   3rd Qu.:235.3   3rd Qu.:113.0  
+ Max.   :363.7   Max.   :170.0   Max.   :30.91   Max.   :395.0   Max.   :175.0  
+                                                                                
+  Night.Charge      Intl.Mins       Intl.Calls      Intl.Charge    CustServ.Calls 
+ Min.   : 1.040   Min.   : 0.00   Min.   : 0.000   Min.   :0.000   Min.   :0.000  
+ 1st Qu.: 7.520   1st Qu.: 8.50   1st Qu.: 3.000   1st Qu.:2.300   1st Qu.:1.000  
+ Median : 9.050   Median :10.30   Median : 4.000   Median :2.780   Median :1.000  
+ Mean   : 9.039   Mean   :10.24   Mean   : 4.479   Mean   :2.765   Mean   :1.563  
+ 3rd Qu.:10.590   3rd Qu.:12.10   3rd Qu.: 6.000   3rd Qu.:3.270   3rd Qu.:2.000  
+ Max.   :17.770   Max.   :20.00   Max.   :20.000   Max.   :5.400   Max.   :9.000  
+                                                                                  
+   Churn        
+ Mode :logical  
+ FALSE:2850     
+ TRUE :483      
+                
+                
+                
+################                
+DATA CLEANING
+####################
+#Delete columns which cannot be used for prediction, such as Phone and State. 
+#Then convert char variables to factors.
+
+> churndata_1 <- select(Churn, -Phone,-State)
+> churndata_1$Int.l.Plan <- ifelse(churndata_1$Int.l.Plan=='no',0,1)
+> churndata_1$VMail.Plan <- ifelse(churndata_1$VMail.Plan=='no',0,1)
+> x <- as.matrix(churndata_1[,1:18])
+> y <- as.matrix(churndata_1[,19])
+> LASSO_model <- cv.glmnet(x,y,family="binomial",type.measure="deviance")
+> plot(LASSO_model)
+
+##Here is the largest value of lambda.
+> LASSO_model$lambda.1se
+[1] 0.01881126
+
+
+> #A fitted logistic regression for the full data:
+> final_model <- LASSO_model$glmnet.fit
+> #Coefficients of the regression model:
+> model.coef <- coef(LASSO_model$glmnet.fit,s=LASSO_model$lambda.1se)
+> model.coef
+19 x 1 sparse Matrix of class "dgCMatrix"
+                          1
+(Intercept)    -4.657522598
+Account.Length  .          
+Area.Code       .          
+Int.l.Plan      1.503318388
+VMail.Plan     -0.359582340
+VMail.Message   .          
+Day.Mins        0.008343593
+Day.Calls       .          
+Day.Charge      .          
+Eve.Mins        0.002407006
+Eve.Calls       .          
+Eve.Charge      .          
+Night.Mins      .          
+Night.Calls     .          
+Night.Charge    .          
+Intl.Mins       0.009407573
+Intl.Calls     -0.001254754
+Intl.Charge     0.001967000
+CustServ.Calls  0.342268202
+> LASSO_pre <- predict(final_model,newx = x, s=LASSO_model$lambda.1se,type = 'response')
+> head(LASSO_pre)
+              1
+[1,] 0.13099555
+[2,] 0.06159823
+[3,] 0.09796944
+[4,] 0.55828523
+[5,] 0.42973277
+[6,] 0.33088680
+> LASSO_pre_class <- predict(final_model,newx = x, s=LASSO_model$lambda.1se,type = 'class')
+> head(LASSO_pre_class)
+     1      
+[1,] "FALSE"
+[2,] "FALSE"
+[3,] "FALSE"
+[4,] "TRUE" 
+[5,] "FALSE"
+[6,] "FALSE"
+
+######
+Visualization of Regression Results
+#####
+
+> churndata_1$Churn1 = ifelse(churndata_1$Churn=='TRUE',1,0)
+> popbio::logi.hist.plot(churndata_1$Day.Charge, churndata_1$Churn1, boxp=FALSE,type="hist",col="gray")
+> table(y,LASSO_pre_class)
+       LASSO_pre_class
+y       FALSE TRUE
+  FALSE  2823   27
+  TRUE    446   37
+> confusionMatrix(factor(y),factor(LASSO_pre_class),positive = 'FALSE')
+Confusion Matrix and Statistics
+
+          Reference
+Prediction FALSE TRUE
+     FALSE  2823   27
+     TRUE    446   37
+                                          
+               Accuracy : 0.8581          
+                 95% CI : (0.8458, 0.8698)
+    No Information Rate : 0.9808          
+    P-Value [Acc > NIR] : 1               
+                                          
+                  Kappa : 0.1049          
+ Mcnemar's Test P-Value : <2e-16          
+                                          
+            Sensitivity : 0.8636          
+            Specificity : 0.5781          
+         Pos Pred Value : 0.9905          
+         Neg Pred Value : 0.0766          
+             Prevalence : 0.9808          
+         Detection Rate : 0.8470          
+   Detection Prevalence : 0.8551          
+      Balanced Accuracy : 0.7208          
+                                          
+       'Positive' Class : FALSE           
+                                          
+> head(preobs)
+Error in head(preobs) : object 'preobs' not found
+> #2. Receiver Operating Characteristic (ROC) Curve
+> #Since the target variable is binary categorical, 
+> #in addition to a confusion matrix, we can also evaluate the 
+> #model with ROC curve.
+> preobs <- data.frame(prob=LASSO_pre, obs=churndata_1$Churn1)
+> head(preobs)
+          X1 obs
+1 0.13099555   0
+2 0.06159823   0
+3 0.09796944   0
+4 0.55828523   0
+5 0.42973277   0
+6 0.33088680   0
+> modelroc = roc(preobs$obs, preobs$X1)
+> plot(modelroc, print.auc=TRUE, auc.polygon=T, grid=c(0.1,0.2),grid.col=c('green','red'),max.auc.polygon=TRUE, auc.polygon.col="skyblue", print.thres=TRUE)
+> #1. Decision Tree Model
+> churndata_2 <- select(churndata_1,-Churn1)
+> Tree_model <- rpart(as.factor(Churn)~., data = churndata_2)
+> summary(Tree_model)
+Call:
+rpart(formula = as.factor(Churn) ~ ., data = churndata_2)
+  n= 3333 
+
+          CP nsplit rel error    xerror       xstd
+1 0.08902692      0 1.0000000 1.0000000 0.04207569
+2 0.08488613      1 0.9109731 0.9917184 0.04193049
+3 0.07867495      2 0.8260870 0.9440994 0.04107595
+4 0.05279503      4 0.6687371 0.6811594 0.03565194
+5 0.01863354      7 0.4741201 0.4865424 0.03059918
+6 0.01759834      8 0.4554865 0.4824017 0.03047853
+7 0.01242236     13 0.3623188 0.4389234 0.02917091
+8 0.01000000     16 0.3250518 0.4140787 0.02838771
+
+Variable importance
+    Day.Charge       Day.Mins CustServ.Calls       Eve.Mins     Eve.Charge 
+            18             18              9              8              8 
+   Intl.Charge      Intl.Mins     Int.l.Plan     Intl.Calls  VMail.Message 
+             8              8              6              5              5 
+    VMail.Plan    Night.Calls      Area.Code 
+             5              1              1 
+
+Node number 1: 3333 observations,    complexity param=0.08902692
+  predicted class=FALSE  expected loss=0.1449145  P(node) =1
+    class counts:  2850   483
+   probabilities: 0.855 0.145 
+  left son=2 (3122 obs) right son=3 (211 obs)
+  Primary splits:
+      Day.Mins       < 264.45 to the left,  improve=94.083100, (0 missing)
+      Day.Charge     < 44.96  to the left,  improve=94.083100, (0 missing)
+      CustServ.Calls < 3.5    to the left,  improve=80.306170, (0 missing)
+      Int.l.Plan     < 0.5    to the left,  improve=55.774830, (0 missing)
+      Intl.Mins      < 13.15  to the left,  improve= 8.656215, (0 missing)
+  Surrogate splits:
+      Day.Charge < 44.96  to the left,  agree=1, adj=1, (0 split)
+
+Node number 2: 3122 observations,    complexity param=0.07867495
+  predicted class=FALSE  expected loss=0.1140295  P(node) =0.9366937
+    class counts:  2766   356
+   probabilities: 0.886 0.114 
+  left son=4 (2871 obs) right son=5 (251 obs)
+  Primary splits:
+      CustServ.Calls < 3.5    to the left,  improve=83.860470, (0 missing)
+      Int.l.Plan     < 0.5    to the left,  improve=54.867830, (0 missing)
+      Day.Mins       < 223.25 to the left,  improve=12.026250, (0 missing)
+      Day.Charge     < 37.95  to the left,  improve=12.026250, (0 missing)
+      Intl.Mins      < 13.15  to the left,  improve= 8.063614, (0 missing)
+
+Node number 3: 211 observations,    complexity param=0.08488613
+  predicted class=TRUE   expected loss=0.3981043  P(node) =0.06330633
+    class counts:    84   127
+   probabilities: 0.398 0.602 
+  left son=6 (53 obs) right son=7 (158 obs)
+  Primary splits:
+      VMail.Plan    < 0.5    to the right, improve=33.80609, (0 missing)
+      VMail.Message < 6.5    to the right, improve=33.80609, (0 missing)
+      Eve.Mins      < 167.3  to the left,  improve=14.73393, (0 missing)
+      Eve.Charge    < 14.22  to the left,  improve=14.73393, (0 missing)
+      Day.Mins      < 316.7  to the left,  improve= 7.00330, (0 missing)
+  Surrogate splits:
+      VMail.Message  < 6.5    to the right, agree=1.000, adj=1.000, (0 split)
+      Night.Calls    < 50     to the left,  agree=0.758, adj=0.038, (0 split)
+      Account.Length < 15.5   to the left,  agree=0.754, adj=0.019, (0 split)
+
+Node number 4: 2871 observations,    complexity param=0.05279503
+  predicted class=FALSE  expected loss=0.07976315  P(node) =0.8613861
+    class counts:  2642   229
+   probabilities: 0.920 0.080 
+  left son=8 (2604 obs) right son=9 (267 obs)
+  Primary splits:
+      Int.l.Plan  < 0.5    to the left,  improve=52.464180, (0 missing)
+      Day.Mins    < 221.85 to the left,  improve=19.883390, (0 missing)
+      Day.Charge  < 37.715 to the left,  improve=19.883390, (0 missing)
+      Intl.Mins   < 13.15  to the left,  improve= 8.200801, (0 missing)
+      Intl.Charge < 3.55   to the left,  improve= 8.200801, (0 missing)
+
+Node number 5: 251 observations,    complexity param=0.07867495
+  predicted class=TRUE   expected loss=0.4940239  P(node) =0.07530753
+    class counts:   124   127
+   probabilities: 0.494 0.506 
+  left son=10 (149 obs) right son=11 (102 obs)
+  Primary splits:
+      Day.Mins       < 160.2  to the right, improve=46.178350, (0 missing)
+      Day.Charge     < 27.235 to the right, improve=46.178350, (0 missing)
+      Eve.Mins       < 190.8  to the right, improve=11.171240, (0 missing)
+      Eve.Charge     < 16.22  to the right, improve=11.171240, (0 missing)
+      CustServ.Calls < 4.5    to the left,  improve= 4.362024, (0 missing)
+  Surrogate splits:
+      Day.Charge  < 27.235 to the right, agree=1.000, adj=1.000, (0 split)
+      Night.Calls < 79.5   to the right, agree=0.618, adj=0.059, (0 split)
+      Area.Code   < 462.5  to the left,  agree=0.610, adj=0.039, (0 split)
+      Eve.Mins    < 118.6  to the right, agree=0.610, adj=0.039, (0 split)
+      Eve.Charge  < 10.08  to the right, agree=0.610, adj=0.039, (0 split)
+
+Node number 6: 53 observations
+  predicted class=FALSE  expected loss=0.1132075  P(node) =0.01590159
+    class counts:    47     6
+   probabilities: 0.887 0.113 
+
+Node number 7: 158 observations,    complexity param=0.01759834
+  predicted class=TRUE   expected loss=0.2341772  P(node) =0.04740474
+    class counts:    37   121
+   probabilities: 0.234 0.766 
+  left son=14 (57 obs) right son=15 (101 obs)
+  Primary splits:
+      Eve.Mins     < 187.75 to the left,  improve=19.095760, (0 missing)
+      Eve.Charge   < 15.96  to the left,  improve=19.095760, (0 missing)
+      Night.Mins   < 206.85 to the left,  improve= 4.867292, (0 missing)
+      Night.Charge < 9.305  to the left,  improve= 4.867292, (0 missing)
+      Day.Mins     < 278.45 to the left,  improve= 4.754541, (0 missing)
+  Surrogate splits:
+      Eve.Charge     < 15.96  to the left,  agree=1.000, adj=1.000, (0 split)
+      Intl.Mins      < 3.35   to the left,  agree=0.658, adj=0.053, (0 split)
+      Intl.Charge    < 0.905  to the left,  agree=0.658, adj=0.053, (0 split)
+      Account.Length < 20.5   to the left,  agree=0.652, adj=0.035, (0 split)
+      Day.Calls      < 68     to the left,  agree=0.652, adj=0.035, (0 split)
+
+Node number 8: 2604 observations,    complexity param=0.01759834
+  predicted class=FALSE  expected loss=0.04915515  P(node) =0.7812781
+    class counts:  2476   128
+   probabilities: 0.951 0.049 
+  left son=16 (2221 obs) right son=17 (383 obs)
+  Primary splits:
+      Day.Mins   < 223.25 to the left,  improve=14.804280, (0 missing)
+      Day.Charge < 37.95  to the left,  improve=14.804280, (0 missing)
+      Eve.Mins   < 244.95 to the left,  improve= 7.215623, (0 missing)
+      Eve.Charge < 20.825 to the left,  improve= 7.215623, (0 missing)
+      Night.Mins < 163.85 to the left,  improve= 1.727421, (0 missing)
+  Surrogate splits:
+      Day.Charge < 37.95  to the left,  agree=1, adj=1, (0 split)
+
+Node number 9: 267 observations,    complexity param=0.05279503
+  predicted class=FALSE  expected loss=0.3782772  P(node) =0.08010801
+    class counts:   166   101
+   probabilities: 0.622 0.378 
+  left son=18 (216 obs) right son=19 (51 obs)
+  Primary splits:
+      Intl.Calls  < 2.5    to the right, improve=48.736160, (0 missing)
+      Intl.Mins   < 13.1   to the left,  improve=45.240980, (0 missing)
+      Intl.Charge < 3.535  to the left,  improve=45.240980, (0 missing)
+      Day.Mins    < 220.05 to the left,  improve= 2.335478, (0 missing)
+      Day.Charge  < 37.405 to the left,  improve= 2.335478, (0 missing)
+  Surrogate splits:
+      Day.Calls   < 48     to the right, agree=0.816, adj=0.039, (0 split)
+      Night.Calls < 57.5   to the right, agree=0.813, adj=0.020, (0 split)
+
+Node number 10: 149 observations,    complexity param=0.01863354
+  predicted class=FALSE  expected loss=0.2550336  P(node) =0.04470447
+    class counts:   111    38
+   probabilities: 0.745 0.255 
+  left son=20 (130 obs) right son=21 (19 obs)
+  Primary splits:
+      Eve.Mins    < 141.75 to the right, improve=10.110570, (0 missing)
+      Eve.Charge  < 12.05  to the right, improve=10.110570, (0 missing)
+      Day.Mins    < 182.3  to the right, improve= 5.050074, (0 missing)
+      Day.Charge  < 30.995 to the right, improve= 5.050074, (0 missing)
+      Night.Calls < 108    to the left,  improve= 2.471396, (0 missing)
+  Surrogate splits:
+      Eve.Charge < 12.05  to the right, agree=1, adj=1, (0 split)
+
+Node number 11: 102 observations
+  predicted class=TRUE   expected loss=0.127451  P(node) =0.03060306
+    class counts:    13    89
+   probabilities: 0.127 0.873 
+
+Node number 14: 57 observations,    complexity param=0.01759834
+  predicted class=FALSE  expected loss=0.4385965  P(node) =0.01710171
+    class counts:    32    25
+   probabilities: 0.561 0.439 
+  left son=28 (25 obs) right son=29 (32 obs)
+  Primary splits:
+      Day.Mins     < 277.7  to the left,  improve=6.912675, (0 missing)
+      Day.Charge   < 47.21  to the left,  improve=6.912675, (0 missing)
+      Night.Mins   < 212.65 to the left,  improve=6.032297, (0 missing)
+      Night.Charge < 9.57   to the left,  improve=6.032297, (0 missing)
+      Eve.Mins     < 144.25 to the left,  improve=5.632080, (0 missing)
+  Surrogate splits:
+      Day.Charge  < 47.21  to the left,  agree=1.000, adj=1.00, (0 split)
+      Eve.Calls   < 114    to the right, agree=0.684, adj=0.28, (0 split)
+      Intl.Mins   < 10.8   to the right, agree=0.649, adj=0.20, (0 split)
+      Intl.Charge < 2.915  to the right, agree=0.649, adj=0.20, (0 split)
+      Eve.Mins    < 180.1  to the right, agree=0.632, adj=0.16, (0 split)
+
+Node number 15: 101 observations
+  predicted class=TRUE   expected loss=0.04950495  P(node) =0.03030303
+    class counts:     5    96
+   probabilities: 0.050 0.950 
+
+Node number 16: 2221 observations
+  predicted class=FALSE  expected loss=0.02701486  P(node) =0.6663666
+    class counts:  2161    60
+   probabilities: 0.973 0.027 
+
+Node number 17: 383 observations,    complexity param=0.01759834
+  predicted class=FALSE  expected loss=0.1775457  P(node) =0.1149115
+    class counts:   315    68
+   probabilities: 0.822 0.178 
+  left son=34 (332 obs) right son=35 (51 obs)
+  Primary splits:
+      Eve.Mins      < 259.8  to the left,  improve=28.150970, (0 missing)
+      Eve.Charge    < 22.08  to the left,  improve=28.150970, (0 missing)
+      VMail.Plan    < 0.5    to the right, improve= 6.313601, (0 missing)
+      VMail.Message < 5.5    to the right, improve= 6.313601, (0 missing)
+      Night.Mins    < 181.15 to the left,  improve= 4.818110, (0 missing)
+  Surrogate splits:
+      Eve.Charge  < 22.08  to the left,  agree=1.000, adj=1.00, (0 split)
+      Intl.Mins   < 2.05   to the right, agree=0.869, adj=0.02, (0 split)
+      Intl.Charge < 0.555  to the right, agree=0.869, adj=0.02, (0 split)
+
+Node number 18: 216 observations,    complexity param=0.05279503
+  predicted class=FALSE  expected loss=0.2314815  P(node) =0.06480648
+    class counts:   166    50
+   probabilities: 0.769 0.231 
+  left son=36 (173 obs) right son=37 (43 obs)
+  Primary splits:
+      Intl.Mins   < 13.1   to the left,  improve=63.418330, (0 missing)
+      Intl.Charge < 3.535  to the left,  improve=63.418330, (0 missing)
+      Eve.Mins    < 163.4  to the left,  improve= 2.123757, (0 missing)
+      Eve.Charge  < 13.885 to the left,  improve= 2.123757, (0 missing)
+      Day.Mins    < 237.2  to the left,  improve= 1.910053, (0 missing)
+  Surrogate splits:
+      Intl.Charge   < 3.535  to the left,  agree=1.000, adj=1.000, (0 split)
+      VMail.Message < 40.5   to the left,  agree=0.806, adj=0.023, (0 split)
+      Day.Mins      < 52.45  to the right, agree=0.806, adj=0.023, (0 split)
+      Day.Charge    < 8.92   to the right, agree=0.806, adj=0.023, (0 split)
+      Night.Calls   < 141.5  to the left,  agree=0.806, adj=0.023, (0 split)
+
+Node number 19: 51 observations
+  predicted class=TRUE   expected loss=0  P(node) =0.01530153
+    class counts:     0    51
+   probabilities: 0.000 1.000 
+
+Node number 20: 130 observations,    complexity param=0.01242236
+  predicted class=FALSE  expected loss=0.1846154  P(node) =0.0390039
+    class counts:   106    24
+   probabilities: 0.815 0.185 
+  left son=40 (96 obs) right son=41 (34 obs)
+  Primary splits:
+      Day.Mins    < 175.75 to the right, improve=4.751207, (0 missing)
+      Day.Charge  < 29.88  to the right, improve=4.751207, (0 missing)
+      Night.Calls < 108    to the left,  improve=2.946628, (0 missing)
+      Day.Calls   < 131    to the left,  improve=2.213955, (0 missing)
+      Intl.Mins   < 13.7   to the left,  improve=1.743620, (0 missing)
+  Surrogate splits:
+      Day.Charge  < 29.88  to the right, agree=1.000, adj=1.000, (0 split)
+      Day.Calls   < 143    to the left,  agree=0.754, adj=0.059, (0 split)
+      Intl.Mins   < 4.85   to the right, agree=0.746, adj=0.029, (0 split)
+      Intl.Charge < 1.31   to the right, agree=0.746, adj=0.029, (0 split)
+
+Node number 21: 19 observations
+  predicted class=TRUE   expected loss=0.2631579  P(node) =0.00570057
+    class counts:     5    14
+   probabilities: 0.263 0.737 
+
+Node number 28: 25 observations
+  predicted class=FALSE  expected loss=0.16  P(node) =0.00750075
+    class counts:    21     4
+   probabilities: 0.840 0.160 
+
+Node number 29: 32 observations,    complexity param=0.01242236
+  predicted class=TRUE   expected loss=0.34375  P(node) =0.00960096
+    class counts:    11    21
+   probabilities: 0.344 0.656 
+  left son=58 (8 obs) right son=59 (24 obs)
+  Primary splits:
+      Eve.Mins     < 144.35 to the left,  improve=6.020833, (0 missing)
+      Eve.Charge   < 12.27  to the left,  improve=6.020833, (0 missing)
+      Intl.Calls   < 4.5    to the right, improve=3.708088, (0 missing)
+      Night.Mins   < 210.35 to the left,  improve=3.691468, (0 missing)
+      Night.Charge < 9.465  to the left,  improve=3.691468, (0 missing)
+  Surrogate splits:
+      Eve.Charge  < 12.27  to the left,  agree=1.000, adj=1.00, (0 split)
+      Intl.Mins   < 7.25   to the left,  agree=0.812, adj=0.25, (0 split)
+      Intl.Charge < 1.955  to the left,  agree=0.812, adj=0.25, (0 split)
+
+Node number 34: 332 observations
+  predicted class=FALSE  expected loss=0.1024096  P(node) =0.09960996
+    class counts:   298    34
+   probabilities: 0.898 0.102 
+
+Node number 35: 51 observations,    complexity param=0.01759834
+  predicted class=TRUE   expected loss=0.3333333  P(node) =0.01530153
+    class counts:    17    34
+   probabilities: 0.333 0.667 
+  left son=70 (11 obs) right son=71 (40 obs)
+  Primary splits:
+      VMail.Plan    < 0.5    to the right, improve=12.466670, (0 missing)
+      VMail.Message < 5.5    to the right, improve=12.466670, (0 missing)
+      Night.Mins    < 256.15 to the right, improve= 2.354978, (0 missing)
+      Night.Charge  < 11.525 to the right, improve= 2.354978, (0 missing)
+      Night.Calls   < 113    to the left,  improve= 2.294197, (0 missing)
+  Surrogate splits:
+      VMail.Message < 5.5    to the right, agree=1.000, adj=1.000, (0 split)
+      Night.Mins    < 256.15 to the right, agree=0.843, adj=0.273, (0 split)
+      Night.Charge  < 11.525 to the right, agree=0.843, adj=0.273, (0 split)
+      Eve.Calls     < 68     to the left,  agree=0.804, adj=0.091, (0 split)
+
+Node number 36: 173 observations
+  predicted class=FALSE  expected loss=0.04046243  P(node) =0.05190519
+    class counts:   166     7
+   probabilities: 0.960 0.040 
+
+Node number 37: 43 observations
+  predicted class=TRUE   expected loss=0  P(node) =0.01290129
+    class counts:     0    43
+   probabilities: 0.000 1.000 
+
+Node number 40: 96 observations
+  predicted class=FALSE  expected loss=0.1041667  P(node) =0.02880288
+    class counts:    86    10
+   probabilities: 0.896 0.104 
+
+Node number 41: 34 observations,    complexity param=0.01242236
+  predicted class=FALSE  expected loss=0.4117647  P(node) =0.01020102
+    class counts:    20    14
+   probabilities: 0.588 0.412 
+  left son=82 (18 obs) right son=83 (16 obs)
+  Primary splits:
+      Eve.Mins    < 212.15 to the right, improve=12.970590, (0 missing)
+      Eve.Charge  < 18.03  to the right, improve=12.970590, (0 missing)
+      Night.Calls < 101.5  to the left,  improve= 3.488132, (0 missing)
+      Area.Code   < 411.5  to the left,  improve= 2.800259, (0 missing)
+      Night.Mins  < 172.9  to the right, improve= 1.213445, (0 missing)
+  Surrogate splits:
+      Eve.Charge  < 18.03  to the right, agree=1.000, adj=1.000, (0 split)
+      Night.Calls < 97     to the left,  agree=0.765, adj=0.500, (0 split)
+      Area.Code   < 411.5  to the left,  agree=0.676, adj=0.313, (0 split)
+      Intl.Mins   < 14.3   to the left,  agree=0.647, adj=0.250, (0 split)
+      Intl.Charge < 3.865  to the left,  agree=0.647, adj=0.250, (0 split)
+
+Node number 58: 8 observations
+  predicted class=FALSE  expected loss=0.125  P(node) =0.00240024
+    class counts:     7     1
+   probabilities: 0.875 0.125 
+
+Node number 59: 24 observations
+  predicted class=TRUE   expected loss=0.1666667  P(node) =0.00720072
+    class counts:     4    20
+   probabilities: 0.167 0.833 
+
+Node number 70: 11 observations
+  predicted class=FALSE  expected loss=0  P(node) =0.00330033
+    class counts:    11     0
+   probabilities: 1.000 0.000 
+
+Node number 71: 40 observations
+  predicted class=TRUE   expected loss=0.15  P(node) =0.0120012
+    class counts:     6    34
+   probabilities: 0.150 0.850 
+
+Node number 82: 18 observations
+  predicted class=FALSE  expected loss=0  P(node) =0.00540054
+    class counts:    18     0
+   probabilities: 1.000 0.000 
+
+Node number 83: 16 observations
+  predicted class=TRUE   expected loss=0.125  P(node) =0.00480048
+    class counts:     2    14
+   probabilities: 0.125 0.875 
+
+> fancyRpartPlot(Tree_model)
+> printcp(Tree_model)
+
+Classification tree:
+rpart(formula = as.factor(Churn) ~ ., data = churndata_2)
+
+Variables actually used in tree construction:
+[1] CustServ.Calls Day.Mins       Eve.Mins       Int.l.Plan     Intl.Calls    
+[6] Intl.Mins      VMail.Plan    
+
+Root node error: 483/3333 = 0.14491
+
+n= 3333 
+
+        CP nsplit rel error  xerror     xstd
+1 0.089027      0   1.00000 1.00000 0.042076
+2 0.084886      1   0.91097 0.99172 0.041930
+3 0.078675      2   0.82609 0.94410 0.041076
+4 0.052795      4   0.66874 0.68116 0.035652
+5 0.018634      7   0.47412 0.48654 0.030599
+6 0.017598      8   0.45549 0.48240 0.030479
+7 0.012422     13   0.36232 0.43892 0.029171
+8 0.010000     16   0.32505 0.41408 0.028388
+> #Select the optimal cp value associated with the minimum error:
+>   Tree_model$cptable[which.min(Tree_model$cptable[,"xerror"]),"CP"]
+[1] 0.01
+> #Plotcp() provides a graphical representation to the cross validated error summary:
+>   plotcp(Tree_model)
+> #Prediction
+> Tree_pre <- predict(Tree_model, type = 'class')
+> Tree_pre2 <- predict(Tree_model, type = 'prob')
+> #Model Evalution
+> #1. ConfusionMatrix
+> table(churndata_2$Churn,Tree_pre)
+       Tree_pre
+        FALSE TRUE
+  FALSE  2815   35
+  TRUE    122  361
+> confusionMatrix(factor(churndata_2$Churn),factor(Tree_pre),positive = 'FALSE')
+Confusion Matrix and Statistics
+
+          Reference
+Prediction FALSE TRUE
+     FALSE  2815   35
+     TRUE    122  361
+                                          
+               Accuracy : 0.9529          
+                 95% CI : (0.9451, 0.9598)
+    No Information Rate : 0.8812          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.7946          
+ Mcnemar's Test P-Value : 6.717e-12       
+                                          
+            Sensitivity : 0.9585          
+            Specificity : 0.9116          
+         Pos Pred Value : 0.9877          
+         Neg Pred Value : 0.7474          
+             Prevalence : 0.8812          
+         Detection Rate : 0.8446          
+   Detection Prevalence : 0.8551          
+      Balanced Accuracy : 0.9350          
+                                          
+       'Positive' Class : FALSE           
+                                          
+> #2-Receiver Operating Characteristic (ROC) Curve
+> preobs2 <- data.frame(prob=Tree_pre2[,1], obs=churndata_1$Churn1)
+> head(preobs2)
+       prob obs
+1 0.8867925   0
+2 0.9729851   0
+3 0.8975904   0
+4 0.8750000   0
+5 0.9595376   0
+6 0.9595376   0
+> modelroc2 = roc(preobs2$obs, preobs2$prob)
+> plot(modelroc2, print.auc=TRUE, auc.polygon=T, grid=c(0.1,0.2),grid.col=c('green','red'),max.auc.polygon=TRUE, auc.polygon.col="skyblue", print.thres=TRUE)
+> #By comparing the AUC value (0.820 vs. 0.909), and the criteria in ConfusionMatrix, the Decision Tree Model performs better than Logistic Regression, it has been selected for further prediction.
